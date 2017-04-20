@@ -1,19 +1,38 @@
 (function(){
     var config = document.getElementById('loader.js').getAttribute("config");
-    if (config){
+    if (!config){throw 'config error:' + config;}
+    try {
         config = eval("(" + config + ")");
-        var list = config.list;
-        var html = document.getElementsByTagName('html')[0];
+    } catch (e){
+        throw 'config error:' + config;
+    }
 
 
-        // 同源的js还可以使用ajax方式获取内容使其生效
+    var items = config.items;
+    var base = config.base;
+    if (!base){
+        base = "";
+    }
+    // 循环添加
+    var parentElement = document.getElementsByTagName('head')[0];
+    if (!parentElement) {
+        parentElement = document.getElementsByTagName('html')[0];
+    }
 
-        // 循环添加
-        for (var i = 0;i < list.length; i++){
-            var el = document.createElement('script');
-            el.src = config.base + list[i] + '.js';
-            html.appendChild(el);
-            // html.removeChild(el);
-        }
+    var element;
+    for (var i = 0,len = items.length;i < len; i++){
+
+        var item = items[i],url = base + item;
+        if (-1 != item.lastIndexOf(".css")) {
+            element = document.createElement('link');
+            element.rel = "stylesheet";
+            element.href = url;
+        } else if (-1 != item.indexOf(".js")){
+            // js
+            element = document.createElement('script');
+            element.src = url;
+        } else {throw 'items `.js` or `.css`'}
+        parentElement.appendChild(element);
+
     }
 })();
